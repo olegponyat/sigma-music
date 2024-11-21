@@ -12,7 +12,9 @@ else:
 
 synthesiser = pipeline("text-to-audio", "facebook/musicgen-small", device=device)
 
-music = synthesiser("80s rock music", forward_params={"do_sample": True})
+music = synthesiser("country music", forward_params={"do_sample": True})
+print(music["audio"])
+print(music["sampling_rate"])
 
 scipy.io.wavfile.write("musicgen_out1.wav", rate=music["sampling_rate"], data=music["audio"])
 
