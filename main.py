@@ -13,29 +13,41 @@ if torch.cuda.is_available():
 else:
     device = -1
 
-""" synthesiser = pipeline("text-to-audio", "facebook/musicgen-small", device=device)
+# insert customizable toggles
 
-music = synthesiser("country music", forward_params={"do_sample": True})
-print(music["audio"])
-print(music["sampling_rate"])
+description = 'country music'
 
-scipy.io.wavfile.write("musicgen_out2.wav", rate=music["sampling_rate"], data=music["audio"]) """
+def generate(description):
+    synthesiser = pipeline("text-to-audio", "facebook/musicgen-small", device=device)
 
-samplerate, data = wavfile.read('./musicgen_out.wav')
-print(f'Samplerate: {samplerate}')
-print(f'Data: {data, data.shape}')
+    music = synthesiser(description, forward_params={"do_sample": True})
+    print(music["audio"])
+    print(music["sampling_rate"])
 
-length = 29
-time = np.linspace(0., length, data.shape[0])
-plt.plot(time, data, label="Amplitude")
-plt.legend()
-plt.xlabel("Time [s]")
-plt.ylabel("Amplitude")
-plt.show()
+    scipy.io.wavfile.write("musicgen_out4.wav", rate=music["sampling_rate"], data=music["audio"])
+
+    samplerate, data = wavfile.read('./musicgen_out.wav')
+    print(f'Samplerate: {samplerate}')
+    print(f'Data: {data, data.shape}')
+    display(data)
+
+def display(data):
+    length = 29
+    time = np.linspace(0., length, data.shape[0])
+    plt.plot(time, data, label="Amplitude")
+    plt.legend()
+    plt.xlabel("Time [s]")
+    plt.ylabel("Amplitude")
+    plt.show()
 
 @app.route("/")
-def hello_world():
+def home():
     return "<p>Sigma Music Inc.</p>"
+
+@app.route("/music", methods=["GET"])
+def music():
+    generate(description)
+    return f"<p>Generating music for: {description}</p>"
 
 if __name__ == "__main__": 
     app.run(debug=True)
