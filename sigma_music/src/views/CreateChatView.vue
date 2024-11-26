@@ -1,29 +1,29 @@
 <template>
   <div class="chat-container">
     <!-- Greeting -->
-    <div class="greeting">What can I help with? </div>
-    
+    <div class="greeting">What can I help with?</div>
+
     <!-- Chat Input Box -->
     <div class="chat-box">
-      <input type="text" placeholder="Message..." class="chat-input" />
-      <button class="send-button">↑</button>
+      <input type="text" placeholder="Message ChatCBD" class="chat-input" />
+      <button class="send-button" @click="$router.push('/chat')">↑</button>
     </div>
 
     <!-- Example Buttons -->
     <div class="example-inputs">
-      <button class="example-btn">Create image</button>
-      <button class="example-btn">Summarize text</button>
-      <button class="example-btn">Get advice</button>
-      <button class="example-btn">Help me write</button>
-      <button class="example-btn">More</button>
+      <button class="example-btn">🤠 Country</button>
+      <button class="example-btn">🎧 Lo-fi</button>
+      <button class="example-btn">🎸 Rock</button>
+      <button class="example-btn">🎤 Pop</button>
+      <button class="example-btn">🎹 Synth</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "ChatInterface",
-};
+  name: 'ChatInterface',
+}
 </script>
 
 <style scoped>
@@ -72,8 +72,9 @@ export default {
   border: none;
   flex-grow: 1;
   outline: none;
+  font-weight: lighter;
   background: transparent;
-  font-size: 1rem; /* Slightly smaller font */
+  font-size: 0.9rem; /* Slightly smaller font */
   font-family: 'Inter', sans-serif;
   color: #333;
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="centered-container">
-    <div ><em class="quote">"The future of music is right here"</em></div>
+    <div><em class="quote">"The future of music is right here"</em></div>
     <div class="create-chat">
       <router-link to="/create-chat">click here</router-link>
       <span> to create your first chat</span>
@@ -8,9 +8,7 @@
   </div>
 </template>
 
-<script>
-
-</script>
+<script></script>
 
 <style scoped>
 .centered-container {
