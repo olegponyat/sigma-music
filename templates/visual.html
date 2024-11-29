@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<header>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@v0.149.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.149.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="text/javascript">
+    window.amplitudes = {{ data | tojson | safe }};
+    window.spectrogramImage = "{{ spectrogram }}";  // Pass the spectrogram image filename as well
+  </script>
+  <script type="module" src="../static/visual.js">
+  </script>
+</header>
+<body>
+  <canvas id="canvas"></canvas>
+  {{data}}
+  <p>a</p>
+</body>
