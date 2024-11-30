@@ -1,15 +1,14 @@
 <template>
   <div class="centered-container">
-    <div class="quote">"The future of music is right here"</div>
+    <div><em class="quote">"The future of music is right here"</em></div>
     <div class="create-chat">
-      <router-link to="/create-chat">click here to create your first chat</router-link>
+      <router-link to="/create-chat">click here</router-link>
+      <span> to create your first chat</span>
     </div>
   </div>
 </template>
 
-<script>
-
-</script>
+<script></script>
 
 <style scoped>
 .centered-container {
@@ -23,14 +22,18 @@
 }
 
 .quote {
-  font-size: 1.5rem;
+  font-size: 5rem;
+  font-weight: bolder;
   margin-bottom: 1rem;
   position: relative;
   top: -10%;
 }
 
-.create-chat a {
+.create-chat {
   font-size: 1rem;
+}
+
+.create-chat a {
   color: #007bff;
   text-decoration: none;
 }
