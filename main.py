@@ -1,26 +1,33 @@
-from flask import Flask, send_file, render_template, jsonify
+import os
+from flask import Flask, send_file, jsonify
+from flask_cors import CORS
 from transformers import pipeline
 from scipy.io import wavfile
 import scipy
 import torch
+import librosa
 import matplotlib
 matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
 import numpy as np
-import librosa
 
 app = Flask(__name__)
+CORS(app)
+
+# Static folder should be inside the project, accessible via /static URL
+STATIC_DIR = os.path.join(app.root_path, 'static')
+if not os.path.exists(STATIC_DIR):
+    os.makedirs(STATIC_DIR)
 
 if torch.cuda.is_available():
     device = 0
 else:
     device = -1
 
-# insert customizable toggles
-
+# Filenames for the music and spectrogram
 description = "country music"
-plot_filename = "spectrogram.png"
-audio_file = "musicgen_out.wav"
+plot_filename = os.path.join(STATIC_DIR, "spectrogram.png")
+audio_file = os.path.join(STATIC_DIR, "musicgen_out.wav")
 
 def generate(description, plot_filename, audio_file):
     synthesiser = pipeline("text-to-audio", "facebook/musicgen-small", device=device)
@@ -29,11 +36,10 @@ def generate(description, plot_filename, audio_file):
     print(music["audio"])
     print(music["sampling_rate"])
 
+    # Save audio file
     scipy.io.wavfile.write(audio_file, rate=music["sampling_rate"], data=music["audio"])
 
-    samplerate, data = wavfile.read('./musicgen_out.wav')
-    print(f'Samplerate: {samplerate}')
-    print(f'Data: {data, type(data)}')
+    # Generate spectrogram
     display(audio_file, plot_filename)
 
 def display(audio_file, plot_filename):  
@@ -55,19 +61,14 @@ def display(audio_file, plot_filename):
     plt.savefig(plot_filename)
     plt.close(fig)
 
-    return plot_filename
-    
-
-@app.route("/",  methods=["GET"])
-def home():
-    return render_template("home.html")
-
-@app.route("/music", methods=["GET"])
+@app.route("/music", methods=["POST"])
 def music():
     generate(description, plot_filename, audio_file)
-    data = wavfile.read(audio_file)
-    print(data)
-    return render_template("visual.html", spectrogram=plot_filename, data=data[1].tolist())
+    
+    # Return audio file URL and spectrogram URL
+    audio_url = f"/static/musicgen_out.wav"
+    spectrogram_url = f"/static/spectrogram.png"
+    return jsonify({"audio_url": audio_url, "spectrogram_url": spectrogram_url})
 
 if __name__ == "__main__": 
     app.run(debug=True)

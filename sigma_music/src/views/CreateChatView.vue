@@ -5,27 +5,60 @@
 
     <!-- Chat Input Box -->
     <div class="chat-box">
-      <input type="text" placeholder="Message ChatCBD" class="chat-input" />
-      <button class="send-button" @click="$router.push('/chat')">↑</button>
+      <input v-model="message" type="text" placeholder="Message ChatCBD" class="chat-input" />
+      <button class="send-button" @click="sendMessage">↑</button>
     </div>
 
     <!-- Example Buttons -->
     <div class="example-inputs">
-      <button class="example-btn">🤠 Country</button>
-      <button class="example-btn">🎧 Lo-fi</button>
-      <button class="example-btn">🎸 Rock</button>
-      <button class="example-btn">🎤 Pop</button>
-      <button class="example-btn">🎹 Synth</button>
+      <button class="example-btn" @click="setMessage('country music')">🤠 Country</button>
+      <button class="example-btn" @click="setMessage('lo-fi music')">🎧 Lo-fi</button>
+      <button class="example-btn" @click="setMessage('rock music')">🎸 Rock</button>
+      <button class="example-btn" @click="setMessage('pop music')">🎤 Pop</button>
+      <button class="example-btn" @click="setMessage('synth music')">🎹 Synth</button>
+    </div>
+
+    <!-- Display Spectrogram and Audio -->
+    <div v-if="spectrogram">
+      <img :src="spectrogram" alt="Spectrogram" />
+      <audio :src="audioSrc" controls></audio>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'ChatInterface',
-}
-</script>
+  data() {
+    return {
+      message: '', // Current chat message
+      spectrogram: null, // Spectrogram image filename
+      audioSrc: null, // Audio file URL
+    };
+  },
+  methods: {
+    setMessage(description) {
+      this.message = description;
+    },
+    sendMessage() {
+      if (!this.message) return;
 
+      // Send POST request to Flask
+      axios.post('http://localhost:5000/music', { description: this.message })
+        .then(response => {
+          // Handle the response: get the audio file URL and spectrogram URL
+          this.audioSrc = `http://localhost:5000${response.data.audio_url}`;
+          this.spectrogram = `http://localhost:5000${response.data.spectrogram_url}`;
+        })
+        .catch(error => {
+          console.error('Error generating music:', error);
+        });
+    }
+  }
+};
+</script>
 <style scoped>
 /* Importing Inter Font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
