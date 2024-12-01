@@ -1,15 +1,10 @@
 <template>
   <div class="chat-container">
-    <!-- Greeting -->
     <div class="greeting">What can I help with?</div>
-
-    <!-- Chat Input Box -->
     <div class="chat-box">
       <input v-model="message" type="text" placeholder="Message ChatCBD" class="chat-input" />
       <button class="send-button" @click="sendMessage">↑</button>
     </div>
-
-    <!-- Example Buttons -->
     <div class="example-inputs">
       <button class="example-btn" @click="setMessage('country music')">🤠 Country</button>
       <button class="example-btn" @click="setMessage('lo-fi music')">🎧 Lo-fi</button>
@@ -17,14 +12,17 @@
       <button class="example-btn" @click="setMessage('pop music')">🎤 Pop</button>
       <button class="example-btn" @click="setMessage('synth music')">🎹 Synth</button>
     </div>
-
-    <!-- Display Spectrogram and Audio -->
-    <div v-if="spectrogram">
-      <img :src="spectrogram" alt="Spectrogram" />
-      <audio :src="audioSrc" controls></audio>
+    <div v-if="musicFiles.length">
+      <div v-for="(file, index) in musicFiles" :key="index" class="music-file">
+        <div class="music-file-info">
+          <p>{{ message }}</p>
+          <audio :src="file.audioSrc" controls></audio>
+          <img :src="file.spectrogram" alt="Spectrogram" />
+        </div>
+      </div>
     </div>
   </div>
-</template>
+</template> 
 
 <script>
 import axios from 'axios';
@@ -33,9 +31,8 @@ export default {
   name: 'ChatInterface',
   data() {
     return {
-      message: '', // Current chat message
-      spectrogram: null, // Spectrogram image filename
-      audioSrc: null, // Audio file URL
+      message: '',
+      musicFiles: [],
     };
   },
   methods: {
@@ -44,13 +41,12 @@ export default {
     },
     sendMessage() {
       if (!this.message) return;
-
-      // Send POST request to Flask
       axios.post('http://localhost:5000/music', { description: this.message })
         .then(response => {
-          // Handle the response: get the audio file URL and spectrogram URL
-          this.audioSrc = `http://localhost:5000${response.data.audio_url}`;
-          this.spectrogram = `http://localhost:5000${response.data.spectrogram_url}`;
+          this.musicFiles.push({
+            audioSrc: `http://localhost:5000${response.data.audio_url}`,
+            spectrogram: `http://localhost:5000${response.data.spectrogram_url}`,
+          });
         })
         .catch(error => {
           console.error('Error generating music:', error);
@@ -59,26 +55,26 @@ export default {
   }
 };
 </script>
+
 <style scoped>
-/* Importing Inter Font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .chat-container {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertical alignment */
-  align-items: center; /* Horizontal alignment */
-  height: 100vh; /* Full viewport height */
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
   background-color: #ffffff;
-  padding: 2rem; /* Reduced padding */
+  padding: 2rem;
   font-family: 'Inter', sans-serif;
-  text-align: center; /* Center text alignment */
+  text-align: center;
 }
 
 .greeting {
-  font-size: 2.4rem; /* Slightly smaller font */
+  font-size: 2.4rem;
   font-weight: 700;
-  margin-bottom: 1.8rem; /* Reduced spacing */
+  margin-bottom: 1.8rem;
   color: #333;
 }
 
@@ -92,13 +88,13 @@ export default {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 700px; /* Reduced max-width */
+  max-width: 700px;
   border: 1px solid #ddd;
-  border-radius: 22px; /* Slightly smaller radius */
-  padding: 0.4rem 1rem; /* Reduced padding */
+  border-radius: 22px;
+  padding: 0.4rem 1rem;
   background-color: #f7f7f8;
-  margin-bottom: 2rem; /* Reduced spacing */
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+  margin-bottom: 2rem;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chat-input {
@@ -107,7 +103,7 @@ export default {
   outline: none;
   font-weight: lighter;
   background: transparent;
-  font-size: 0.9rem; /* Slightly smaller font */
+  font-size: 0.9rem;
   font-family: 'Inter', sans-serif;
   color: #333;
 }
@@ -120,13 +116,13 @@ export default {
   background-color: #000;
   border: none;
   color: #fff;
-  font-size: 1.4rem; /* Slightly smaller arrow size */
+  font-size: 1.4rem;
   cursor: pointer;
   padding: 0.4rem;
-  border-radius: 50%; /* Circular button */
+  border-radius: 50%;
   font-family: 'Inter', sans-serif;
-  width: 2.2rem; /* Slightly smaller button size */
-  height: 2.2rem; /* Slightly smaller button size */
+  width: 2.2rem;
+  height: 2.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,16 +135,16 @@ export default {
 .example-inputs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.7rem; /* Slightly reduced button spacing */
+  gap: 0.7rem;
   justify-content: center;
 }
 
 .example-btn {
   background-color: #f1f1f1;
   border: none;
-  border-radius: 18px; /* Smaller button radius */
-  padding: 0.6rem 1.1rem; /* Slightly smaller padding */
-  font-size: 0.9rem; /* Slightly smaller text */
+  border-radius: 18px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   color: #333;
