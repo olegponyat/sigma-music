@@ -1,41 +1,99 @@
 <script setup>
+import { ref } from 'vue';
 
+const messages = ref([
+  { sender: 'user', text: 'Hello!' },
+  { sender: 'bot', text: 'Hi there! How can I help you today?' }
+]);
+
+const newMessage = ref('');
+const addMessage = () => {
+  if (newMessage.value.trim() !== '') {
+    // Add user message
+    messages.value.push({ sender: 'user', text: newMessage.value });
+
+    // Add placeholder bot response
+    setTimeout(() => {
+      messages.value.push({ sender: 'bot', text: 'This is a placeholder response.' });
+    }, 500); // Simulate a slight delay for the bot response
+
+    newMessage.value = ''; // Clear input after sending
+  }
+};
 </script>
 
 <template>
   <div class="chat-container">
-  <div class="chat-bubble">
-    TEST
-  </div>
-  </div>
-  <div class="chat-box">
-      <input type="text" placeholder="Message ChatCBD" class="chat-input" />
-      <button class="send-button" @click="$router.push('/chat')">↑</button>
+    <!-- Scrollable chat history -->
+    <div class="chat-history">
+      <div
+        v-for="(message, index) in messages"
+        :key="index"
+        class="chat-bubble"
+        :class="{ 'user-bubble': message.sender === 'user', 'bot-bubble': message.sender === 'bot' }"
+      >
+        {{ message.text }}
+      </div>
     </div>
+
+    <!-- Chat input box -->
+    <div class="chat-box">
+      <input
+        type="text"
+        v-model="newMessage"
+        placeholder="Type a message"
+        class="chat-input"
+        @keydown.enter="addMessage"
+      />
+      <button class="send-button" @click="addMessage">↑</button>
+    </div>
+  </div>
 </template>
 
 <style>
 .chat-container {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertical alignment */
-  align-items: center; /* Horizontal alignment */
-  height: 100vh; /* Full viewport height */
+  justify-content: flex-end;
+  align-items: center;
+  height: 100vh;
   background-color: #ffffff;
-  padding: 2rem; /* Reduced padding */
   font-family: 'Inter', sans-serif;
-  text-align: center; /* Center text alignment */
+  position: relative;
+}
+
+.chat-history {
+  width: 100%;
+  max-width: 700px;
+  height: 80vh; /* Increased height for the chat history */
+  overflow-y: auto; /* Enable scrolling */
+  padding: 1rem;
+  background-color: #f7f7f8; /* Matching color to chat box */
+  border-radius: 12px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
 
 .chat-bubble {
-  max-width: 60%;
   padding: 10px;
-  background-color: #f1f1f1;
   border-radius: 20px;
-  position: relative;
-  font-size: 14px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  max-width: 60%;
   line-height: 1.5;
-  margin-bottom: 10px;
+  word-wrap: break-word;
+  background-color: #f1f1f1; /* Neutral background color */
+  color: #000; /* Black font color */
+}
+
+.user-bubble {
+  margin-left: auto; /* Align user messages to the right */
+  background-color: #e1e2e1; /* Light blue for user messages */
+}
+
+.bot-bubble {
+  margin-right: auto; /* Align bot messages to the left */
+  background-color: #e1e2e1; /* Light gray for bot messages */
 }
 
 .chat-box {
@@ -43,13 +101,13 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 700px; /* Reduced max-width */
+  max-width: 700px; /* Same width as chat history */
   border: 1px solid #ddd;
-  border-radius: 22px; /* Slightly smaller radius */
-  padding: 0.4rem 1rem; /* Reduced padding */
-  background-color: #f7f7f8;
-  margin-bottom: 2rem; /* Reduced spacing */
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+  border-radius: 22px;
+  padding: 0.5rem 1rem;
+  background-color: #f7f7f8; /* Matching color */
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px
 }
 
 .chat-input {
@@ -58,7 +116,7 @@
   outline: none;
   font-weight: lighter;
   background: transparent;
-  font-size: 0.9rem; /* Slightly smaller font */
+  font-size: 1rem;
   font-family: 'Inter', sans-serif;
   color: #333;
 }
@@ -71,13 +129,13 @@
   background-color: #000;
   border: none;
   color: #fff;
-  font-size: 1.4rem; /* Slightly smaller arrow size */
+  font-size: 1.4rem;
   cursor: pointer;
   padding: 0.4rem;
-  border-radius: 50%; /* Circular button */
+  border-radius: 50%;
   font-family: 'Inter', sans-serif;
-  width: 2.2rem; /* Slightly smaller button size */
-  height: 2.2rem; /* Slightly smaller button size */
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,28 +145,15 @@
   background-color: #333;
 }
 
-.example-inputs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem; /* Slightly reduced button spacing */
-  justify-content: center;
-}
+@media (max-width: 768px) {
+  .chat-box {
+    max-width: 90%;
+    padding: 0.4rem 0.8rem;
+  }
 
-.example-btn {
-  background-color: #f1f1f1;
-  border: none;
-  border-radius: 18px; /* Smaller button radius */
-  padding: 0.6rem 1.1rem; /* Slightly smaller padding */
-  font-size: 0.9rem; /* Slightly smaller text */
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  white-space: nowrap;
-}
-
-.example-btn:hover {
-  background-color: #e0e0e0;
+  .chat-history {
+    max-width: 90%;
+    height: 60vh; /* Adjusted height for smaller screens */
+  }
 }
 </style>
