@@ -1,30 +1,59 @@
 <script setup>
 import { ref } from 'vue';
+import axios from 'axios';
 
-const messages = ref([
-  { sender: 'user', text: 'Hello!' },
-  { sender: 'bot', text: 'Hi there! How can I help you today?' }
-]);
-
+const messages = ref([]);
 const newMessage = ref('');
+const isLoading = ref(false);
+
 const addMessage = () => {
-  if (newMessage.value.trim() !== '') {
+  const userInput = newMessage.value.trim();
+  if (userInput !== '') {
     // Add user message
-    messages.value.push({ sender: 'user', text: newMessage.value });
+    messages.value.push({ sender: 'user', text: userInput });
 
-    // Add placeholder bot response
-    setTimeout(() => {
-      messages.value.push({ sender: 'bot', text: 'This is a placeholder response.' });
-    }, 500); // Simulate a slight delay for the bot response
+    // Clear input and set loading state
+    newMessage.value = '';
+    isLoading.value = true;
 
-    newMessage.value = ''; // Clear input after sending
+    // Add "bot is typing" indicator
+    messages.value.push({ sender: 'bot', text: 'Bot is typing...' });
+
+    // Send the message to Flask server
+    axios
+      .post('http://localhost:5000/music', { description: userInput })
+      .then((response) => {
+        // Remove "bot is typing" message
+        messages.value.pop();
+        console.log(response.data)
+
+        // Add bot's audio response only after both URLs are available
+        messages.value.push({
+          sender: 'bot',
+          audioUrl: response.data.audio_url, // Add audio URL as a message
+          spectrogramUrl: response.data.spectrogram_url, // Add spectrogram URL as a message
+        });
+
+      })
+      .catch((error) => {
+        // Remove "bot is typing" message
+        messages.value.pop();
+
+        messages.value.push({
+          sender: 'bot',
+          text: `Error generating music. ${error.response?.data?.message || 'Please try again.'}`,
+        });
+        console.error('Error:', error);
+      })
+      .finally(() => {
+        isLoading.value = false;
+      });
   }
 };
 </script>
 
 <template>
   <div class="chat-container">
-    <!-- Scrollable chat history -->
     <div class="chat-history">
       <div
         v-for="(message, index) in messages"
@@ -32,20 +61,31 @@ const addMessage = () => {
         class="chat-bubble"
         :class="{ 'user-bubble': message.sender === 'user', 'bot-bubble': message.sender === 'bot' }"
       >
-        {{ message.text }}
+        <!-- Display message text if no audio URL -->
+        <template v-if="!message.audioUrl">
+          {{ message.text }}
+        </template>
+
+        <!-- Render audio player and spectrogram if URLs exist -->
+        <template v-else>
+          <audio :src="message.audioUrl" controls></audio>
+          <img :src="message.spectrogramUrl" alt="Spectrogram" />
+        </template>
       </div>
     </div>
 
-    <!-- Chat input box -->
     <div class="chat-box">
       <input
         type="text"
         v-model="newMessage"
         placeholder="Type a message"
         class="chat-input"
+        :disabled="isLoading"
         @keydown.enter="addMessage"
       />
-      <button class="send-button" @click="addMessage">↑</button>
+      <button class="send-button" @click="addMessage" :disabled="isLoading">
+        ↑
+      </button>
     </div>
   </div>
 </template>
@@ -105,7 +145,7 @@ const addMessage = () => {
   border: 1px solid #ddd;
   border-radius: 22px;
   padding: 0.5rem 1rem;
-  background-color: #f7f7f8; /* Matching color */
+  background-color: #ffffff; /* Matching color */
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px
 }

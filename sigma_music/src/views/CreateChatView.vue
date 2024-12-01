@@ -1,29 +1,3 @@
-<template>
-  <div class="chat-container">
-    <div class="greeting">What can I help with?</div>
-    <div class="chat-box">
-      <input v-model="message" type="text" placeholder="Message ChatCBD" class="chat-input" />
-      <button class="send-button" @click="sendMessage">↑</button>
-    </div>
-    <div class="example-inputs">
-      <button class="example-btn" @click="setMessage('country music')">🤠 Country</button>
-      <button class="example-btn" @click="setMessage('lo-fi music')">🎧 Lo-fi</button>
-      <button class="example-btn" @click="setMessage('rock music')">🎸 Rock</button>
-      <button class="example-btn" @click="setMessage('pop music')">🎤 Pop</button>
-      <button class="example-btn" @click="setMessage('synth music')">🎹 Synth</button>
-    </div>
-    <div v-if="musicFiles.length">
-      <div v-for="(file, index) in musicFiles" :key="index" class="music-file">
-        <div class="music-file-info">
-          <p>{{ message }}</p>
-          <audio :src="file.audioSrc" controls></audio>
-          <img :src="file.spectrogram" alt="Spectrogram" />
-        </div>
-      </div>
-    </div>
-  </div>
-</template> 
-
 <script>
 import axios from 'axios';
 
@@ -31,56 +5,124 @@ export default {
   name: 'ChatInterface',
   data() {
     return {
-      message: '',
-      musicFiles: [],
+      message: '', // User's input message
+      musicFiles: [], // Array to store audio and spectrogram URLs
+      isLoading: false, // Loading state
     };
   },
   methods: {
+    // Method to set the message text
     setMessage(description) {
       this.message = description;
     },
+
+    // Method to send the message and fetch the audio file
     sendMessage() {
       if (!this.message) return;
-      axios.post('http://localhost:5000/music', { description: this.message })
-        .then(response => {
+
+      // Show loading state
+      this.isLoading = true;
+
+      // Send the request to the Flask server
+      axios
+        .post('http://localhost:5000/music', { description: this.message })
+        .then((response) => {
+          // Push the audio and spectrogram URLs to the musicFiles array
           this.musicFiles.push({
-            audioSrc: `http://localhost:5000${response.data.audio_url}`,
-            spectrogram: `http://localhost:5000${response.data.spectrogram_url}`,
+            audioSrc: `http://localhost:5000${response.data.audio_url}`, // Full audio URL
+            spectrogram: `http://localhost:5000${response.data.spectrogram_url}`, // Full spectrogram URL
           });
+
+          // Clear the message input after sending
+          this.message = '';
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Error generating music:', error);
+        })
+        .finally(() => {
+          // Hide loading state
+          this.isLoading = false;
         });
     }
   }
 };
 </script>
 
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+<template>
+  <div class="chat-container">
+    <div class="chat-history">
+      <div
+        v-for="(file, index) in musicFiles"
+        :key="index"
+        class="chat-bubble bot-bubble"
+      >
+        <!-- Audio player for the generated music -->
+        <audio :src="file.audioSrc" controls></audio>
+        
+        <!-- Spectrogram image -->
+        <img :src="file.spectrogram" alt="Spectrogram" />
+      </div>
+    </div>
 
+    <div class="chat-box">
+      <input
+        type="text"
+        v-model="message"
+        placeholder="Type a description"
+        class="chat-input"
+        :disabled="isLoading"
+        @keydown.enter="sendMessage"
+      />
+      <button
+        class="send-button"
+        @click="sendMessage"
+        :disabled="isLoading"
+      >
+        ↑
+      </button>
+    </div>
+  </div>
+</template>
+
+<style scoped>
 .chat-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   height: 100vh;
   background-color: #ffffff;
-  padding: 2rem;
   font-family: 'Inter', sans-serif;
-  text-align: center;
+  position: relative;
 }
 
-.greeting {
-  font-size: 2.4rem;
-  font-weight: 700;
-  margin-bottom: 1.8rem;
-  color: #333;
+.chat-history {
+  width: 100%;
+  max-width: 700px;
+  height: 80vh; /* Increased height for the chat history */
+  overflow-y: auto; /* Enable scrolling */
+  padding: 1rem;
+  background-color: #f7f7f8;
+  border-radius: 12px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
 
-.status-dot {
-  color: #2ecc71;
-  font-size: 1.2rem;
+.chat-bubble {
+  padding: 10px;
+  border-radius: 20px;
+  font-size: 16px;
+  margin-bottom: 15px;
+  max-width: 60%;
+  line-height: 1.5;
+  word-wrap: break-word;
+  background-color: #f1f1f1;
+  color: #000;
+}
+
+.bot-bubble {
+  margin-right: auto;
+  background-color: #e1e2e1;
 }
 
 .chat-box {
@@ -91,10 +133,10 @@ export default {
   max-width: 700px;
   border: 1px solid #ddd;
   border-radius: 22px;
-  padding: 0.4rem 1rem;
-  background-color: #f7f7f8;
-  margin-bottom: 2rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .chat-input {
@@ -103,8 +145,7 @@ export default {
   outline: none;
   font-weight: lighter;
   background: transparent;
-  font-size: 0.9rem;
-  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
   color: #333;
 }
 
@@ -120,9 +161,8 @@ export default {
   cursor: pointer;
   padding: 0.4rem;
   border-radius: 50%;
-  font-family: 'Inter', sans-serif;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -132,28 +172,15 @@ export default {
   background-color: #333;
 }
 
-.example-inputs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  justify-content: center;
-}
+@media (max-width: 768px) {
+  .chat-box {
+    max-width: 90%;
+    padding: 0.4rem 0.8rem;
+  }
 
-.example-btn {
-  background-color: #f1f1f1;
-  border: none;
-  border-radius: 18px;
-  padding: 0.6rem 1.1rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  white-space: nowrap;
-}
-
-.example-btn:hover {
-  background-color: #e0e0e0;
+  .chat-history {
+    max-width: 90%;
+    height: 60vh; /* Adjusted height for smaller screens */
+  }
 }
 </style>
