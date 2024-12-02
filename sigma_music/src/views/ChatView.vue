@@ -104,10 +104,10 @@ onMounted(() => {
 .chat-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   height: 100vh;
-  background-color: #ffffff;
+  background-color: #f7f9fc;
   padding: 2rem;
   font-family: 'Inter', sans-serif;
   text-align: center;
@@ -120,31 +120,48 @@ onMounted(() => {
   overflow-y: auto;
   padding: 1rem;
   border-radius: 12px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
+  background-color: #fff;
 }
 
 .chat-bubble {
-  padding: 10px 15px;
+  padding: 12px 18px;
   border-radius: 20px;
   font-size: 16px;
   margin-bottom: 15px;
-  max-width: fit-content; /* Ensure bubble width adjusts to content */
-  min-width: 100px; /* Prevent very narrow bubbles */
+  max-width: 75%; /* Prevents bubbles from becoming too wide */
   line-height: 1.5;
   word-wrap: break-word;
   color: #000;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .user-bubble {
-  margin-left: auto;
   background-color: #e1e2e1;
+  margin-left: auto;
+  max-width: 70%;
+  position: relative;
 }
 
 .bot-bubble {
-  margin-right: auto;
   background-color: #d4f1f4; /* Light blue color for distinction */
   color: #002333; /* Dark text for better readability */
+  margin-right: auto;
+  max-width: 70%;
+  position: relative;
+}
+
+.chat-bubble a {
+  display: block;
+  margin-top: 10px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.chat-bubble a:hover {
+  text-decoration: underline;
 }
 
 .chat-box {
@@ -159,17 +176,29 @@ onMounted(() => {
   background-color: #ffffff;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  transition: box-shadow 0.3s ease;
+}
+
+.chat-box:hover {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .chat-input {
   flex-grow: 1;
-  width: 700px;
+  width: 100%;
   border: none;
   outline: none;
   background: transparent;
   font-size: 1rem;
   color: #333;
   margin-right: 10px;
+  padding: 8px;
+  border-radius: 20px;
+}
+
+.chat-input:focus {
+  border: 1px solid #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .send-button {
@@ -185,6 +214,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.3s ease;
 }
 
 .send-button:hover {
@@ -200,6 +230,22 @@ onMounted(() => {
   .chat-history {
     max-width: 90%;
     height: 60vh;
+  }
+
+  .chat-bubble {
+    font-size: 14px; /* Adjust for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-input {
+    font-size: 0.9rem;
+  }
+
+  .send-button {
+    font-size: 1.2rem;
+    width: 2rem;
+    height: 2rem;
   }
 }
 </style>

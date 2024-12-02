@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<header>
+<head>
   <script type="importmap">
     {
       "imports": {
@@ -10,13 +10,13 @@
   </script>
 
   <script type="text/javascript">
-    window.amplitudes = {{ data | tojson | safe }};  // Pass the audio data (amplitudes)
+    // Pass the audio data (amplitudes) from the server-side template
+    window.amplitudes = {{ data | tojson | safe }};
     window.audioUrl = "{{ url_for('static', filename='musicgen_out_' + unique_id + '.wav') }}"; // Dynamic URL to the audio file
-    window.uniqueId = "{{ unique_id }}";  // Pass the unique_id to JS
   </script>
 
   <script type="module" src="../static/visual.js"></script>
-</header>
+</head>
 
 <body>
   <!-- Audio Player -->
@@ -27,4 +27,26 @@
 
   <!-- 3D Canvas for Three.js -->
   <canvas id="canvas"></canvas>
+
+  <script>
+    // Reference to the audio player and canvas
+    const audioPlayer = document.getElementById('audioPlayer');
+    const canvas = document.getElementById('canvas');
+
+    // Flag to track if audio has already been played
+    let audioPlayed = false;
+
+    // Event listener for canvas updates
+    canvas.addEventListener('webglcontextrestored', () => {
+      if (!audioPlayed) {
+        // Play the audio when canvas is updated (first time)
+        audioPlayer.play();
+        audioPlayed = true; // Ensure the audio plays only once
+      }
+    });
+
+    // Assuming that Three.js is running and rendering the canvas
+    // You may use Three.js's `renderer`'s render loop to trigger this event if needed.
+    // Here we assume the canvas is updated regularly as per Three.js updates.
+  </script>
 </body>

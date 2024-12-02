@@ -92,4 +92,5 @@ def visual(unique_id):
     return render_template(
         "visual.html", 
         data=audio_data,
+        unique_id=unique_id,  # Pass unique_id to the template
     )
