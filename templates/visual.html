@@ -8,15 +8,23 @@
       }
     }
   </script>
+
   <script type="text/javascript">
-    window.amplitudes = {{ data | tojson | safe }};
-    window.spectrogramImage = "{{ spectrogram }}";  // Pass the spectrogram image filename as well
+    window.amplitudes = {{ data | tojson | safe }};  // Pass the audio data (amplitudes)
+    window.audioUrl = "{{ url_for('static', filename='musicgen_out_' + unique_id + '.wav') }}"; // Dynamic URL to the audio file
+    window.uniqueId = "{{ unique_id }}";  // Pass the unique_id to JS
   </script>
-  <script type="module" src="../static/visual.js">
-  </script>
+
+  <script type="module" src="../static/visual.js"></script>
 </header>
+
 <body>
+  <!-- Audio Player -->
+  <audio id="audioPlayer" autoplay>
+    <source src="{{ url_for('static', filename='musicgen_out_' + unique_id + '.wav') }}" type="audio/wav">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- 3D Canvas for Three.js -->
   <canvas id="canvas"></canvas>
-  {{data}}
-  <p>a</p>
 </body>

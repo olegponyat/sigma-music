@@ -1,136 +1,100 @@
-<script>
-import axios from 'axios';
-
-export default {
-  name: 'ChatInterface',
-  data() {
-    return {
-      message: '', // User's input message
-      musicFiles: [], // Array to store audio and spectrogram URLs
-      isLoading: false, // Loading state
-    };
-  },
-  methods: {
-    // Method to set the message text
-    setMessage(description) {
-      this.message = description;
-    },
-
-    // Method to send the message and fetch the audio file
-    sendMessage() {
-      if (!this.message) return;
-
-      // Show loading state
-      this.isLoading = true;
-
-      // Send the request to the Flask server
-      axios
-        .post('http://localhost:5000/music', { description: this.message })
-        .then((response) => {
-          // Push the audio and spectrogram URLs to the musicFiles array
-          this.musicFiles.push({
-            audioSrc: `http://localhost:5000${response.data.audio_url}`, // Full audio URL
-            spectrogram: `http://localhost:5000${response.data.spectrogram_url}`, // Full spectrogram URL
-          });
-
-          // Clear the message input after sending
-          this.message = '';
-        })
-        .catch((error) => {
-          console.error('Error generating music:', error);
-        })
-        .finally(() => {
-          // Hide loading state
-          this.isLoading = false;
-        });
-    }
-  }
-};
-</script>
-
 <template>
   <div class="chat-container">
-    <div class="chat-history">
-      <div
-        v-for="(file, index) in musicFiles"
-        :key="index"
-        class="chat-bubble bot-bubble"
-      >
-        <!-- Audio player for the generated music -->
-        <audio :src="file.audioSrc" controls></audio>
-        
-        <!-- Spectrogram image -->
-        <img :src="file.spectrogram" alt="Spectrogram" />
-      </div>
-    </div>
-
+    <div class="greeting">What can I help with?</div>
+    
     <div class="chat-box">
-      <input
-        type="text"
-        v-model="message"
-        placeholder="Type a description"
-        class="chat-input"
-        :disabled="isLoading"
-        @keydown.enter="sendMessage"
+      <input 
+        type="text" 
+        v-model="newMessage" 
+        placeholder="Message ChatCBD" 
+        class="chat-input" 
+        @keydown.enter="navigateToChat" 
       />
-      <button
-        class="send-button"
-        @click="sendMessage"
-        :disabled="isLoading"
-      >
-        ↑
-      </button>
+      <button class="send-button" @click="navigateToChat">↑</button>
+    </div>
+    
+    <div class="example-inputs">
+      <button class="example-btn" @click="presetMessage('🤠 Country')">🤠 Country</button>
+      <button class="example-btn" @click="presetMessage('🎧 Lo-fi')">🎧 Lo-fi</button>
+      <button class="example-btn" @click="presetMessage('🎸 Rock')">🎸 Rock</button>
+      <button class="example-btn" @click="presetMessage('🎤 Pop')">🎤 Pop</button>
+      <button class="example-btn" @click="presetMessage('🎹 Synth')">🎹 Synth</button>
     </div>
   </div>
 </template>
 
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const newMessage = ref('');
+const router = useRouter();
+
+// Navigate to /chat with the message as a query parameter
+const navigateToChat = () => {
+  if (newMessage.value.trim()) {
+    router.push({ name: 'chat', query: { message: newMessage.value } });
+    newMessage.value = ''; // Clear the input field after navigating
+  }
+};
+
+// Set a preset message and navigate to /chat
+const presetMessage = (message) => {
+  newMessage.value = message;
+  navigateToChat();
+};
+</script>
+
+
+
 <style scoped>
+.example-btn:hover {
+  background-color: #e0e0e0;
+}
+.example-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  justify-content: center;
+}
+.greeting {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-bottom: 1.8rem;
+  color: #333;
+}
+.status-dot {
+  color: #2ecc71;
+  font-size: 1.2rem;
+}
 .chat-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   height: 100vh;
   background-color: #ffffff;
+  padding: 2rem;
   font-family: 'Inter', sans-serif;
-  position: relative;
+  text-align: center;
 }
-
-.chat-history {
-  width: 100%;
-  max-width: 700px;
-  height: 80vh; /* Increased height for the chat history */
-  overflow-y: auto; /* Enable scrolling */
-  padding: 1rem;
-  background-color: #f7f7f8;
-  border-radius: 12px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-}
-
-.chat-bubble {
-  padding: 10px;
-  border-radius: 20px;
-  font-size: 16px;
-  margin-bottom: 15px;
-  max-width: 60%;
-  line-height: 1.5;
-  word-wrap: break-word;
+.example-btn {
   background-color: #f1f1f1;
-  color: #000;
+  border: none;
+  border-radius: 18px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
 }
-
-.bot-bubble {
-  margin-right: auto;
-  background-color: #e1e2e1;
-}
-
 .chat-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 700px;
+  display: flex; /* Use flexbox to align items horizontally */
+  align-items: center; /* Vertically center the elements */
+  justify-content: space-between; /* Add space between the input and button */
   border: 1px solid #ddd;
   border-radius: 22px;
   padding: 0.5rem 1rem;
@@ -140,17 +104,16 @@ export default {
 }
 
 .chat-input {
+  flex-grow: 1; /* Make the input field take up remaining space */
+  width: 700px;
   border: none;
-  flex-grow: 1;
   outline: none;
   font-weight: lighter;
   background: transparent;
   font-size: 1rem;
+  font-family: 'Inter', sans-serif;
   color: #333;
-}
-
-.chat-input::placeholder {
-  color: #aaa;
+  margin-right: 10px; /* Add some spacing between input and button */
 }
 
 .send-button {
@@ -161,6 +124,7 @@ export default {
   cursor: pointer;
   padding: 0.4rem;
   border-radius: 50%;
+  font-family: 'Inter', sans-serif;
   width: 2.5rem;
   height: 2.5rem;
   display: flex;
@@ -169,18 +133,7 @@ export default {
 }
 
 .send-button:hover {
-  background-color: #333;
+  background-color: #555;
 }
 
-@media (max-width: 768px) {
-  .chat-box {
-    max-width: 90%;
-    padding: 0.4rem 0.8rem;
-  }
-
-  .chat-history {
-    max-width: 90%;
-    height: 60vh; /* Adjusted height for smaller screens */
-  }
-}
 </style>
